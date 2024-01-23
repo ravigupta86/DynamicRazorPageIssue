@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<!--<MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
+		<RazorCompileOnBuild>false</RazorCompileOnBuild>-->
+		<EnableDefaultContentItems>true</EnableDefaultContentItems>
+	</PropertyGroup>
+	
+	<UsingTask TaskName="PreprocessFile" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<InputFilename ParameterType="System.String" Required="true" />
+			<OutputFilename ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Using Namespace="System" />
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Text.RegularExpressions" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[  
+			Directory.CreateDirectory(Path.GetDirectoryName(OutputFilename));
+			File.Copy(InputFilename, OutputFilename, true);
+        ]]>
+			</Code>
+		</Task>
+	</UsingTask>
+
+	<Target Name="ProcessCshtml" BeforeTargets="ResolveRazorGenerateInputs">
+		<!--
+		In this POC PreprocessFile custom task simply renames and saves file while in actual app it processes scshtml file code 
+		to replace some macros with corresponding CSS/JS code blocks
+		-->
+		<PreprocessFile InputFilename="Pages\Index.scshtml" OutputFilename="$(OutputPath)MyPages\Index.cshtml" />
+	</Target>
+
+	<Target Name="CompileDynamicCode" AfterTargets="ProcessCshtml" BeforeTargets="ResolveRazorGenerateInputs">
+		<ItemGroup>
+			<RazorGenerate Include="$(OutputPath)MyPages\Index.cshtml" />
+		</ItemGroup>
+	</Target>
+
+</Project>

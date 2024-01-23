@@ -1,0 +1,5 @@
+﻿@page
+@{
+    Layout = null;
+}
+<h1>Test</h1>
